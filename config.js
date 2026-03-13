@@ -18,9 +18,14 @@ const CONFIG = {
   // color: カレンダー表示色
   // ----------------------------------------------------------
   MEMBERS: [
-    { name: '野口純',   lastName: '野口', calendarId: 'j.noguchi@digi-man.com', color: '#222222' },
-    { name: '松居和輝', lastName: '松居', calendarId: 'k.matsui@digi-man.com',  color: '#e04f24' },
+    { name: '野口純',   lastName: '野口', calendarId: 'j.noguchi@digi-man.com', color: '#222222', zoomPmi: '' },
+    { name: '松居和輝', lastName: '松居', calendarId: 'k.matsui@digi-man.com',  color: '#e04f24', zoomPmi: '' },
   ],
+
+  // Zoom個人ミーティングID設定方法:
+  // 各メンバーの zoomPmi に Zoom PMI番号(例: '123-456-7890')を入力すると
+  // Google Meetの代わりにZoom URLが使用されます
+  // 空欄の場合はGoogle Meetを使用
 
   // ----------------------------------------------------------
   // 稼働時間設定

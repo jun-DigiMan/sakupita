@@ -73,6 +73,7 @@ const state = {
   weekCount: 1,                     // 1 or 2
   members: loadMembersFromStorage(),
   calendarConnected: {},            // { calendarId: true/false }
+  rescheduleData: null,    // リスケジュールモード時の元予約データ
 };
 
 const DAY_NAMES = ['月', '火', '水', '木', '金'];
@@ -140,6 +141,23 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   processUrlParams(); // URLパラメータからメンバー追加
   renderLegend();
+
+  // リスケジュールキャンセルボタン
+  document.getElementById('reschedule-cancel-btn').addEventListener('click', () => {
+    exitRescheduleMode();
+    closeModal();
+  });
+
+  // URLパラメータでリスケジュールモード起動
+  const _urlParams = new URLSearchParams(window.location.search);
+  const _rescheduleId = _urlParams.get('reschedule');
+  if (_rescheduleId) {
+    const _bookingData = JSON.parse(localStorage.getItem('sakupita_booking_' + _rescheduleId) || 'null');
+    if (_bookingData) {
+      // メインアプリ表示後にバナー表示
+      setTimeout(() => enterRescheduleMode(_bookingData), 300);
+    }
+  }
 
   document.getElementById('signin-btn').addEventListener('click', handleSignIn);
 
@@ -588,14 +606,15 @@ function openModal(date, hour, min, availableMembers) {
     grid.appendChild(btn);
   });
 
-  // フォームリセット
-  document.getElementById('customer-name').value = '';
-  document.getElementById('company-name').value = '';
-  document.getElementById('customer-email').value = '';
-  document.getElementById('customer-phone').value = '';
-  document.getElementById('customer-dept').value = '';
-  document.getElementById('customer-title').value = '';
-  document.getElementById('meeting-comment').value = '';
+  // フォームリセット or リスケジュールモード時は元データで埋める
+  const rd = state.rescheduleData;
+  document.getElementById('customer-name').value  = rd ? rd.customerName  : '';
+  document.getElementById('company-name').value   = rd ? rd.companyName   : '';
+  document.getElementById('customer-email').value = rd ? rd.customerEmail : '';
+  document.getElementById('customer-phone').value = rd ? rd.customerPhone : '';
+  document.getElementById('customer-dept').value  = rd ? rd.customerDept  : '';
+  document.getElementById('customer-title').value = rd ? rd.customerTitle : '';
+  document.getElementById('meeting-comment').value = rd ? rd.comment      : '';
 
   document.getElementById('booking-modal').classList.remove('hidden');
   document.getElementById('company-name').focus();
@@ -707,10 +726,17 @@ async function handleBooking() {
       }
       return;
     } else {
+      // リスケジュールモード: 旧イベント削除
+      if (state.rescheduleData?.eventId) {
+        try { await deleteCalendarEvent(state.rescheduleData.eventId); } catch(e) { console.warn('旧イベント削除失敗:', e); }
+      }
+
+      const zoomPmi = state.selectedMember.zoomPmi || '';
       const created = await createCalendarEvent({
         title, startISO, endISO,
         memberEmail: state.selectedMember.calendarId,
         customerEmail, customerPhone, companyName, customerName, customerDept, customerTitle, comment,
+        zoomPmi,
       });
       // 確認メール送信 → バウンス確認 → 成否をカレンダーに記録
       let mailStatus = '';
@@ -719,12 +745,29 @@ async function handleBooking() {
         const fmt = (h, m) => `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
         const dateLabel = `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日（${DAY_NAMES[date.getDay()-1]}）${fmt(hour,min)} 〜 ${fmt(endH,endM)}`;
         const sendTimestamp = Math.floor(Date.now() / 1000);
+        const bookingId = generateBookingId();
+        const bookingData = {
+          bookingId, eventId: created.id,
+          customerName, companyName, customerEmail, customerPhone,
+          customerDept, customerTitle, comment,
+          memberName: state.selectedMember.name,
+          memberEmail: state.selectedMember.calendarId,
+          dateLabel, startISO,
+        };
+        saveBookingLocally(bookingId, bookingData);
+        const appUrl = window.location.origin + window.location.pathname;
+        const rescheduleLink = `${appUrl}?reschedule=${bookingId}`;
+        const zoomPmi = state.selectedMember.zoomPmi || '';
+        const meetUrl = zoomPmi
+          ? `https://zoom.us/j/${zoomPmi.replace(/\D/g, '')}`
+          : (created.meetUrl || '');
         await sendConfirmationEmails({
           customerName, companyName, customerEmail,
           memberName:  state.selectedMember.name,
           memberEmail: state.selectedMember.calendarId,
-          dateLabel,
-          meetUrl: created.meetUrl || '',
+          dateLabel, meetUrl, zoomPmi,
+          rescheduleLink,
+          isReschedule: !!state.rescheduleData,
         });
         // バウンスメール到着を待って確認（即時バウンスは数秒で届く）
         btn.textContent = 'メール到達確認中...';
@@ -777,9 +820,15 @@ async function handleBooking() {
         await appendToSheet({
           companyName, customerName, customerDept, customerTitle,
           customerPhone, customerEmail,
-          sentDate, meetingDate,
-          comment,
+          sentDate, meetingDate, comment,
+          bookingId, eventId: created.id,
+          memberName: state.selectedMember.name,
+          memberEmail: state.selectedMember.calendarId,
+          startISO,
+          isReschedule: !!state.rescheduleData,
         });
+        // リスケジュールモード終了
+        if (state.rescheduleData) exitRescheduleMode();
       } catch(sheetErr) {
         console.warn('スプレッドシート記録失敗:', sheetErr);
       }
@@ -807,36 +856,46 @@ async function handleBooking() {
 // ---------- Google Calendar イベント作成（Google Meet付き） ----------
 // 'primary' = サインイン中ユーザーのカレンダー（常に書き込み可能）
 // 担当者・顧客を attendee に追加して招待メールを自動送信
-async function createCalendarEvent({ title, startISO, endISO, memberEmail, customerEmail, customerPhone, companyName, customerName, customerDept, customerTitle, comment }) {
+async function createCalendarEvent({ title, startISO, endISO, memberEmail, customerEmail, customerPhone, companyName, customerName, customerDept, customerTitle, comment, zoomPmi }) {
   const attendees = [];
   if (memberEmail)   attendees.push({ email: memberEmail });
   if (customerEmail) attendees.push({ email: customerEmail });
 
+  const zoomUrl = zoomPmi ? `https://zoom.us/j/${zoomPmi.replace(/\D/g, '')}` : '';
+  const descBase = `【会社名】${companyName || ''}\n【顧客名】${customerName}様\n【部署名・役職名】${customerDept || ''}${customerTitle ? ' ' + customerTitle : ''}\n【電話番号】${customerPhone || ''}\n【メールアドレス】${customerEmail || ''}${comment ? '\n【コメント】' + comment : ''}`;
+
   const event = {
     summary: title,
-    description: `【会社名】${companyName || ''}\n【顧客名】${customerName}様\n【部署名・役職名】${customerDept || ''}${customerTitle ? ' ' + customerTitle : ''}\n【電話番号】${customerPhone || ''}\n【メールアドレス】${customerEmail || ''}${comment ? '\n【コメント】' + comment : ''}`,
+    description: descBase + (zoomUrl ? `\n\n【Zoom URL】${zoomUrl}` : ''),
     start: { dateTime: startISO, timeZone: 'Asia/Tokyo' },
     end:   { dateTime: endISO,   timeZone: 'Asia/Tokyo' },
     attendees,
-    conferenceData: {
+    reminders: { useDefault: true },
+  };
+
+  // Zoom PMIが設定されている場合はZoom URLをlocation、Google Meetは使わない
+  if (zoomUrl) {
+    event.location = zoomUrl;
+  } else {
+    event.conferenceData = {
       createRequest: {
         requestId: `sakupita-${Date.now()}`,
         conferenceSolutionKey: { type: 'hangoutsMeet' },
       },
-    },
-    reminders: { useDefault: true },
-  };
+    };
+  }
+
   const res = await gapi.client.request({
     path: 'https://www.googleapis.com/calendar/v3/calendars/primary/events',
     method: 'POST',
     params: {
-      conferenceDataVersion: 1,
+      conferenceDataVersion: zoomUrl ? 0 : 1,
       sendUpdates: attendees.length > 0 ? 'all' : 'none',
     },
     body: event,
   });
   const created = res.result;
-  const meetUrl = created.conferenceData?.entryPoints?.find(e => e.entryPointType === 'video')?.uri || '';
+  const meetUrl = zoomUrl || created.conferenceData?.entryPoints?.find(e => e.entryPointType === 'video')?.uri || '';
   return { ...created, meetUrl };
 }
 
@@ -913,11 +972,18 @@ async function sendGmail(to, subject, htmlBody) {
   });
 }
 
-async function sendConfirmationEmails({ customerName, companyName, customerEmail, memberName, memberEmail, dateLabel, meetUrl }) {
-  const subject = 'お打ち合わせ日程確定のご連絡';
+async function sendConfirmationEmails({ customerName, companyName, customerEmail, memberName, memberEmail, dateLabel, meetUrl, zoomPmi, rescheduleLink, isReschedule }) {
+  const subject = isReschedule ? '【日程変更】お打ち合わせ日程のご連絡' : 'お打ち合わせ日程確定のご連絡';
   const logoTag = `<img src="cid:sakupita_logo" alt="サクピタ" style="height:87px;">`;
+  const isZoom = !!(zoomPmi && meetUrl);
   const meetHtml = meetUrl
-    ? `<p style="margin:16px 0;"><strong>■ Google Meet URL</strong><br><a href="${meetUrl}" style="color:#1155cc;">${meetUrl}</a></p><p>当日は上記URLよりGoogle Meetにてご参加ください。</p>`
+    ? `<p style="margin:16px 0;"><strong>■ ${isZoom ? 'Zoom' : 'Google Meet'} URL</strong><br><a href="${meetUrl}" style="color:#1155cc;">${meetUrl}</a></p><p>当日は上記URLより${isZoom ? 'Zoom' : 'Google Meet'}にてご参加ください。</p>`
+    : '';
+  const rescheduleHtml = rescheduleLink
+    ? `<p style="margin:16px 0;color:#888;font-size:13px;">日程変更が必要な場合は担当者までご連絡ください。</p>`
+    : '';
+  const memberRescheduleHtml = rescheduleLink
+    ? `<p style="margin:16px 0;background:#f8f9fa;border-left:3px solid #f0c040;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;">🔄 <strong>日程変更リンク（担当者用）</strong><br><a href="${rescheduleLink}" style="color:#1155cc;">${rescheduleLink}</a><br><small style="color:#888;">このリンクからログイン済みのサクピタで日程変更できます</small></p>`
     : '';
 
   const header = `<div style="background:#1a2744;padding:16px 24px;border-radius:8px 8px 0 0;">${logoTag}</div>`;
@@ -927,19 +993,27 @@ async function sendConfirmationEmails({ customerName, companyName, customerEmail
 
   const table = (rows) => `<table style="width:100%;border-collapse:collapse;margin:20px 0;font-size:14px;">${rows.map(([k,v])=>`<tr><td style="padding:10px 14px;background:#f5f5f5;border:1px solid #e0e0e0;width:30%;font-weight:600;">${k}</td><td style="padding:10px 14px;border:1px solid #e0e0e0;">${v}</td></tr>`).join('')}</table>`;
 
+  const rescheduleNotice = isReschedule
+    ? `<p style="background:#fff3cd;border:1px solid #f0c040;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;">🔄 日程変更のご連絡です。</p>`
+    : '';
+
   const customerBody = wrap(
     `<p>${customerName} 様</p>` +
-    `<p>この度はお打ち合わせのご予約をいただき、誠にありがとうございます。<br>以下の日程でお打ち合わせが確定いたしましたのでご連絡申し上げます。</p>` +
+    rescheduleNotice +
+    `<p>${isReschedule ? '日程を変更させていただきましたのでご連絡申し上げます。' : 'この度はお打ち合わせのご予約をいただき、誠にありがとうございます。<br>以下の日程でお打ち合わせが確定いたしましたのでご連絡申し上げます。'}</p>` +
     table([['担当者', memberName], ['会社名', companyName || '—'], ['日時', dateLabel]]) +
     meetHtml +
+    rescheduleHtml +
     `<p>ご不明な点がございましたら、担当者までお気軽にご連絡ください。<br>どうぞよろしくお願いいたします。</p>`
   );
 
   const memberBody = wrap(
     `<p>${memberName} さん</p>` +
-    `<p>新しいお打ち合わせの予約が入りました。</p>` +
+    rescheduleNotice +
+    `<p>${isReschedule ? '日程変更の処理が完了しました。' : '新しいお打ち合わせの予約が入りました。'}</p>` +
     table([['顧客', `${companyName ? companyName + '　' : ''}${customerName} 様`], ['メール', customerEmail], ['日時', dateLabel]]) +
-    meetHtml
+    meetHtml +
+    memberRescheduleHtml
   );
 
   await Promise.all([
@@ -949,7 +1023,7 @@ async function sendConfirmationEmails({ customerName, companyName, customerEmail
 }
 
 // ---------- スプレッドシート連携 ----------
-async function appendToSheet({ companyName, customerName, customerDept, customerTitle, customerPhone, customerEmail, sentDate, meetingDate, comment }) {
+async function appendToSheet({ companyName, customerName, customerDept, customerTitle, customerPhone, customerEmail, sentDate, meetingDate, comment, bookingId, eventId, memberName, memberEmail, startISO, isReschedule }) {
   let sheetId = CONFIG.SHEET_ID || localStorage.getItem('sakupita_sheet_id');
 
   if (!sheetId) {
@@ -971,7 +1045,7 @@ async function appendToSheet({ companyName, customerName, customerDept, customer
       path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1%21A1:append`,
       method: 'POST',
       params: { valueInputOption: 'USER_ENTERED' },
-      body: { values: [['企業名', '担当者名', '部署', '役職', '電話番号', 'メールアドレス', 'メール送信日', '商談日', 'コメント']] },
+      body: { values: [['企業名', '顧客名', '部署', '役職', '電話番号', 'メールアドレス', 'メール送信日', '商談日', 'コメント', '担当者', '担当者メール', '予約ID', 'イベントID', '開始日時(ISO)', '種別']] },
     });
   }
 
@@ -979,7 +1053,7 @@ async function appendToSheet({ companyName, customerName, customerDept, customer
     path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1%21A1:append`,
     method: 'POST',
     params: { valueInputOption: 'USER_ENTERED' },
-    body: { values: [[companyName, customerName, customerDept, customerTitle, customerPhone, customerEmail, sentDate, meetingDate, comment]] },
+    body: { values: [[companyName, customerName, customerDept, customerTitle, customerPhone, customerEmail, sentDate, meetingDate, comment, memberName || '', memberEmail || '', bookingId || '', eventId || '', startISO || '', isReschedule ? '日程変更' : '新規予約']] },
   });
 }
 
@@ -1132,6 +1206,44 @@ function highlight(id) {
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ---------- 予約ID生成 ----------
+function generateBookingId() {
+  return 'bk_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+}
+
+// ---------- 予約データをlocalStorageに保存 ----------
+function saveBookingLocally(bookingId, data) {
+  try {
+    localStorage.setItem('sakupita_booking_' + bookingId, JSON.stringify(data));
+  } catch(e) { console.warn('booking save failed', e); }
+}
+
+// ---------- リスケジュールモード開始 ----------
+function enterRescheduleMode(data) {
+  state.rescheduleData = data;
+  const banner = document.getElementById('reschedule-banner');
+  if (banner) {
+    banner.classList.remove('hidden');
+    document.getElementById('reschedule-banner-text').textContent =
+      `日程変更モード：${data.customerName} 様（${data.companyName || ''}）の予約を変更中`;
+  }
+}
+
+// ---------- リスケジュールモード終了 ----------
+function exitRescheduleMode() {
+  state.rescheduleData = null;
+  const banner = document.getElementById('reschedule-banner');
+  if (banner) banner.classList.add('hidden');
+}
+
+// ---------- カレンダーイベント削除 ----------
+async function deleteCalendarEvent(eventId) {
+  await gapi.client.request({
+    path: `https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`,
+    method: 'DELETE',
+  });
+}
 
 // ---------- 日本語名前自動分割 ----------
 const JP_SURNAMES = (() => {

@@ -857,6 +857,28 @@ html, body {
 }
 
 /* ============================================================
+   リスケジュールバナー
+   ============================================================ */
+.reschedule-banner {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border-bottom: 2px solid #f0c040;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px;
+  font-size: 13px; font-weight: 600; color: #7a5c00;
+  flex-shrink: 0;
+}
+.reschedule-icon { font-size: 18px; }
+.reschedule-cancel-btn {
+  margin-left: auto;
+  background: none; border: 1.5px solid #c0a030;
+  border-radius: 6px; padding: 4px 12px;
+  font-size: 12px; font-weight: 600; color: #7a5c00;
+  cursor: pointer; font-family: var(--font-main);
+  transition: background 0.15s;
+}
+.reschedule-cancel-btn:hover { background: rgba(0,0,0,.06); }
+
+/* ============================================================
    Responsive
    ============================================================ */
 @media (max-width: 768px) {
