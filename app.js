@@ -728,7 +728,7 @@ async function handleBooking() {
         });
         // バウンスメール到着を待って確認（即時バウンスは数秒で届く）
         btn.textContent = 'メール到達確認中...';
-        await sleep(3000);
+        await sleep(1500);
         const bounceRes = await gapi.client.request({
           path: 'https://www.googleapis.com/gmail/v1/users/me/messages',
           params: {
