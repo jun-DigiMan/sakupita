@@ -343,13 +343,14 @@ html, body {
   background: #d6eef8;
   border: none; border-radius: 6px;
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 2px 8px;
   display: flex; flex-direction: column;
   align-items: flex-start; justify-content: center;
-  gap: 3px;
+  gap: 2px;
   font-family: var(--font-main);
   text-align: left;
   transition: background 0.12s, transform 0.1s;
+  overflow: hidden;
 }
 .slot-btn:hover { background: #b8dfef; transform: scale(1.01); }
 .slot-btn:active { transform: scale(0.98); }
@@ -362,12 +363,13 @@ html, body {
 
 .slot-avatars-row {
   display: flex; flex-direction: row;
-  gap: 4px; flex-wrap: wrap;
+  gap: 3px; flex-wrap: nowrap;
+  overflow: hidden;
 }
 .slot-avatar-sm {
-  height: 18px;
-  padding: 0 6px;
-  border-radius: 9px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
   font-size: 10px; font-weight: 700;
   color: white;
   display: inline-flex; align-items: center; justify-content: center;
@@ -797,8 +799,8 @@ html, body {
   /* ブランドは最小幅に縮める */
   .header-brand { flex: 0 0 auto; gap: 4px; }
   .brand-name { display: none; }
-  .brand-icon { font-size: 22px; }
-  .logo-img--header { height: 34px; }
+  .brand-icon { font-size: 28px; }
+  .logo-img--header { height: 44px; }
   /* ナビを中央に伸ばす */
   .header-nav { flex: 1; justify-content: center; gap: 4px; }
   .week-label { font-size: 10px; min-width: 0; white-space: nowrap; }
