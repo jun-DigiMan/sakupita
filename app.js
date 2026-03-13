@@ -136,7 +136,7 @@ window.addEventListener('DOMContentLoaded', () => {
   state.currentMonday = getMonday(new Date());
   // 初期スロット高さを設定
   if (state.slotMinutes === 60) {
-    document.documentElement.style.setProperty('--slot-h', '80px');
+    document.documentElement.style.setProperty('--slot-h', '68px');
   }
   processUrlParams(); // URLパラメータからメンバー追加
   renderLegend();
@@ -176,7 +176,7 @@ window.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       state.slotMinutes = parseInt(btn.dataset.slot);
       document.querySelectorAll('[data-slot]').forEach(b => b.classList.toggle('active', b === btn));
-      const slotH = state.slotMinutes === 60 ? '80px' : '56px';
+      const slotH = state.slotMinutes === 60 ? '68px' : '56px';
       document.documentElement.style.setProperty('--slot-h', slotH);
       loadAndRender();
     });
