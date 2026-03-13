@@ -793,17 +793,23 @@ html, body {
   }
 
   /* ---- Header ---- */
-  .top-header { padding: 0 10px; gap: 6px; height: var(--header-h); }
-  .brand-name { font-size: 12px; }
-  .brand-icon { font-size: 16px; }
-  .header-legend { display: none; }
-  .header-controls { gap: 4px; }
-  .toggle-group { display: none; }
-  .week-label { font-size: 11px; min-width: 0; white-space: nowrap; }
-  .week-label-btn { height: 28px; padding: 0 8px; font-size: 11px; }
+  .top-header { padding: 0 8px; gap: 4px; height: var(--header-h); }
+  /* ブランドは最小幅に縮める */
+  .header-brand { flex: 0 0 auto; gap: 4px; }
+  .brand-name { display: none; }
+  .brand-icon { font-size: 18px; }
+  .logo-img--header { height: 28px; }
+  /* ナビを中央に伸ばす */
+  .header-nav { flex: 1; justify-content: center; gap: 4px; }
+  .week-label { font-size: 10px; min-width: 0; white-space: nowrap; }
+  .week-label-btn { height: 28px; padding: 0 7px; font-size: 10px; }
   .nav-btn { width: 28px; height: 28px; }
+  /* コントロールは固定幅 */
+  .header-controls { flex: 0 0 auto; gap: 4px; }
+  .header-legend { display: none; }
+  .toggle-group { display: none; }
   .members-btn,
-  .signout-header-btn { width: 28px; height: 28px; }
+  .signout-header-btn { width: 28px; height: 28px; margin-left: 0; }
 
   /* ---- Date header ---- */
   .date-header-day { padding: 5px 2px 4px; min-height: 58px; }
