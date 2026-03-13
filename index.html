@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サクピタ｜日程調整ツール</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://apis.google.com">
+  <link rel="preconnect" href="https://accounts.google.com">
+  <link rel="dns-prefetch" href="https://www.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ========== ローディング ========== -->
+<div id="loading-screen">
+  <div class="loading-logo"><img src="logo.png" alt="サクピタ" class="logo-img"></div>
+  <div class="loading-spinner"></div>
+  <p>読み込み中...</p>
+</div>
+
+<!-- ========== サインイン画面 ========== -->
+<div id="signin-screen" class="hidden">
+  <div class="signin-card">
+    <div class="signin-logo"><img src="logo.png" alt="サクピタ" class="logo-img logo-img--lg"></div>
+    <p class="signin-tagline">サクッ！ピタッ！と日程調整</p>
+    <button id="signin-btn" class="btn btn-primary btn-google">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+        <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+        <path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      </svg>
+      Googleアカウントでサインイン
+    </button>
+  </div>
+</div>
+
+<!-- ========== メインアプリ ========== -->
+<div id="main-app" class="hidden">
+
+  <!-- ヘッダー -->
+  <header class="top-header">
+    <div class="header-brand">
+      <img src="logo-header-t.png" alt="サクピタ" class="logo-img logo-img--header">
+      <span id="demo-badge" class="demo-badge hidden">DEMO</span>
+    </div>
+
+    <div class="header-nav">
+      <button class="nav-btn" id="prev-week" title="前の週">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M10.5 3L5.5 8l5 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button class="week-label-btn" id="today-btn">今週</button>
+      <span class="week-label" id="week-label"></span>
+      <button class="nav-btn" id="next-week" title="次の週">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M5.5 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="header-controls">
+      <div class="toggle-group">
+        <button class="toggle-btn active" data-slot="30">30分</button>
+        <button class="toggle-btn" data-slot="60">60分</button>
+      </div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" data-week="1">1週</button>
+        <button class="toggle-btn" data-week="2">2週</button>
+      </div>
+      <button class="members-btn" id="members-btn" title="メンバー管理">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+        </svg>
+      </button>
+      <button class="signout-header-btn" id="signout-header-btn" title="サインアウト">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
+    </div>
+
+  </header>
+
+  <!-- カレンダー本体 -->
+  <div class="calendar-wrapper">
+    <!-- 日付ヘッダー -->
+    <div class="date-header" id="date-header">
+      <div class="time-label-header"></div>
+      <!-- 日付カラムはJSで生成 -->
+    </div>
+
+    <!-- グリッド本体 -->
+    <div class="calendar-body">
+      <div class="time-column" id="time-column"></div>
+      <div class="slots-grid" id="slots-grid"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ========== 予約フォーム（フルページ） ========== -->
+<div class="booking-page hidden" id="booking-modal">
+
+  <!-- ブランドヘッダー -->
+  <div class="booking-brand-bar">
+    <img src="logo.png" alt="サクピタ" class="logo-img logo-img--bar">
+  </div>
+
+  <!-- ===== STEP 2: 情報入力 ===== -->
+  <div class="booking-container" id="booking-form-container">
+
+    <!-- ステップインジケーター -->
+    <div class="step-indicator">
+      <div class="step done" id="step1">
+        <div class="step-circle">✓</div>
+        <span class="step-label">日程選択</span>
+      </div>
+      <div class="step-line done-line"></div>
+      <div class="step active" id="step2">
+        <div class="step-circle">2</div>
+        <span class="step-label">情報入力</span>
+      </div>
+      <div class="step-line" id="step-line-2"></div>
+      <div class="step" id="step3-indicator">
+        <div class="step-circle">3</div>
+        <span class="step-label">日程調整完了</span>
+      </div>
+    </div>
+
+    <!-- 担当者選択 -->
+    <div class="form-section" id="member-section">
+      <label class="form-label-lg">担当者</label>
+      <div class="member-select-grid" id="member-select-grid"></div>
+    </div>
+
+    <!-- 選択日時カード -->
+    <div class="form-section">
+      <label class="form-label-lg">日程</label>
+      <div class="datetime-card">
+        <div class="datetime-info">
+          <div class="datetime-main" id="modal-datetime"></div>
+          <div class="datetime-tz">アジア/東京（UTC+09:00）</div>
+        </div>
+        <button type="button" class="btn-back-date" id="modal-close">日程選択に戻る</button>
+      </div>
+    </div>
+
+    <!-- 会社名（必須） -->
+    <div class="form-section">
+      <label class="form-label-lg">会社名 <span class="hissu">必須</span></label>
+      <input type="text" id="company-name" class="form-input-lg" placeholder="例: 株式会社サクピタ" autocomplete="off">
+    </div>
+
+    <!-- 名前（必須） -->
+    <div class="form-section">
+      <label class="form-label-lg">名前 <span class="hissu">必須</span></label>
+      <input type="text" id="customer-name" class="form-input-lg" placeholder="例: 山田 太郎" autocomplete="off">
+    </div>
+
+    <!-- メールアドレス（必須） -->
+    <div class="form-section">
+      <label class="form-label-lg">メールアドレス <span class="hissu">必須</span></label>
+      <input type="email" id="customer-email" class="form-input-lg" placeholder="例: yamada@example.com" autocomplete="off">
+    </div>
+
+    <!-- 電話番号 -->
+    <div class="form-section">
+      <label class="form-label-lg">電話番号 <span class="hissu">必須</span></label>
+      <input type="tel" id="customer-phone" class="form-input-lg" placeholder="例: 03-1234-5678" autocomplete="off">
+    </div>
+
+    <!-- 部署 -->
+    <div class="form-section">
+      <label class="form-label-lg">部署 <span class="hissu">必須</span></label>
+      <input type="text" id="customer-dept" class="form-input-lg" placeholder="例: 営業部" autocomplete="off">
+    </div>
+
+    <!-- 役職 -->
+    <div class="form-section">
+      <label class="form-label-lg">役職 <span class="hissu">必須</span></label>
+      <input type="text" id="customer-title" class="form-input-lg" placeholder="例: 部長" autocomplete="off">
+    </div>
+
+    <!-- コメント -->
+    <div class="form-section">
+      <label class="form-label-lg">コメント</label>
+      <textarea id="meeting-comment" class="form-textarea" rows="4" placeholder="ご質問・ご要望があればご記入ください"></textarea>
+    </div>
+
+    <!-- 利用規約 + 送信ボタン -->
+    <div class="form-footer">
+      <p class="terms-text">
+        <a href="terms.html" target="_blank" class="terms-link">利用規約</a>・<a href="privacy.html" target="_blank" class="terms-link">プライバシーポリシー</a>に同意し
+      </p>
+      <button type="button" class="btn-submit" id="confirm-booking">
+        上記の内容で日程調整を完了する
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ===== STEP 3: 完了画面 ===== -->
+  <div class="booking-container booking-success-container hidden" id="booking-success">
+
+    <div class="step-indicator">
+      <div class="step done">
+        <div class="step-circle">✓</div>
+        <span class="step-label">日程選択</span>
+      </div>
+      <div class="step-line done-line"></div>
+      <div class="step done">
+        <div class="step-circle">✓</div>
+        <span class="step-label">情報入力</span>
+      </div>
+      <div class="step-line done-line"></div>
+      <div class="step active">
+        <div class="step-circle">3</div>
+        <span class="step-label">日程調整完了</span>
+      </div>
+    </div>
+
+    <div class="success-body">
+      <div class="success-icon-wrap">
+        <div class="success-check">✓</div>
+      </div>
+      <h2 class="success-title">日程調整が完了しました</h2>
+      <p class="success-sub" id="success-sub-msg"></p>
+
+      <div class="success-detail-card">
+        <div class="success-detail-row">
+          <span class="success-detail-label">担当者</span>
+          <span class="success-detail-val" id="success-member"></span>
+        </div>
+        <div class="success-detail-row">
+          <span class="success-detail-label">日程</span>
+          <span class="success-detail-val" id="success-datetime"></span>
+        </div>
+        <div class="success-detail-row" id="success-company-row">
+          <span class="success-detail-label">会社名</span>
+          <span class="success-detail-val" id="success-company"></span>
+        </div>
+        <div class="success-detail-row">
+          <span class="success-detail-label">お名前</span>
+          <span class="success-detail-val" id="success-name"></span>
+        </div>
+        <div class="success-detail-row">
+          <span class="success-detail-label">メール</span>
+          <span class="success-detail-val" id="success-email"></span>
+        </div>
+      </div>
+
+      <button type="button" class="btn-back-to-top" id="back-to-calendar">
+        ← 日程選択に戻る
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ========== 成功トースト ========== -->
+<div class="toast hidden" id="success-toast">
+  <div class="toast-icon">✅</div>
+  <div class="toast-body">
+    <div class="toast-title">予約完了！</div>
+    <div class="toast-msg" id="toast-msg"></div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+<!-- ========== メンバー管理モーダル ========== -->
+<div class="members-overlay hidden" id="members-modal">
+  <div class="members-card">
+    <div class="members-card-header">
+      <h2 class="members-card-title">メンバー管理</h2>
+      <button class="members-card-close" id="members-modal-close">✕</button>
+    </div>
+    <div class="members-list" id="members-list"></div>
+    <div class="members-add">
+      <p class="members-add-title">メンバーを追加</p>
+      <div class="members-add-row">
+        <input type="text" id="new-member-name" class="members-input" placeholder="名前（例: 田中花子）">
+        <input type="email" id="new-member-email" class="members-input" placeholder="メールアドレス">
+        <button class="members-add-btn" id="members-add-btn">追加</button>
+      </div>
+      <div class="members-add-row members-url-row">
+        <div class="members-url-spacer"></div>
+        <input type="text" id="members-url-input" class="members-input" placeholder="連携URLを貼り付け">
+        <button class="members-add-btn" id="members-url-add-btn">追加</button>
+      </div>
+    </div>
+    <div class="members-card-footer">
+      <button class="members-signout-btn" id="signout-btn">Googleカレンダー連携解除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Google API -->
+<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</body>
+</html>

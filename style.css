@@ -1,0 +1,789 @@
+/* ============================================================
+   CSS Variables (seika-hoshu-db と統一)
+   ============================================================ */
+:root {
+  --color-primary:   #1155cc;
+  --color-cyan:      #00a2da;
+  --color-yellow:    #e8d335;
+  --color-danger:    #e04f24;
+  --color-navy:      #082558;
+  --color-text:      #434547;
+  --color-text-sub:  #787b7f;
+  --color-bg:        #f0f4fa;
+  --color-white:     #ffffff;
+  --color-border:    #e4e8ef;
+  --color-hover:     #f0f7ff;
+  --color-success:   #10b981;
+
+  --font-main: 'Noto Sans JP', 'Poppins', sans-serif;
+  --radius-sm:  6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 4px rgba(8,37,88,.08);
+  --shadow-md: 0 4px 16px rgba(8,37,88,.12);
+  --shadow-lg: 0 8px 32px rgba(8,37,88,.16);
+
+  --header-h: 64px;
+  --slot-h: 60px;
+  --time-col-w: 64px;
+}
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-main);
+  font-size: 13px;
+  color: var(--color-text);
+  background: var(--color-bg);
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   Loading Screen
+   ============================================================ */
+#loading-screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px;
+  background: var(--color-bg);
+  z-index: 9999;
+}
+.loading-logo { font-size: 48px; display: flex; align-items: center; justify-content: center; }
+.logo-img            { object-fit: contain; display: block; }
+.logo-img--header    { height: 52px; filter: brightness(0) invert(1); mix-blend-mode: normal; }
+.logo-img--bar       { height: 58px; }
+.logo-img--lg        { height: 110px; margin: 0 auto 8px; }
+.loading-logo .logo-img { height: 80px; mix-blend-mode: multiply; }
+.loading-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading-screen p { color: var(--color-text-sub); font-size: 13px; }
+
+/* ============================================================
+   Signin Screen
+   ============================================================ */
+#signin-screen {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-bg);
+}
+.signin-card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  width: 400px;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+.signin-logo { font-size: 56px; margin-bottom: 16px; }
+.signin-title { font-size: 22px; font-weight: 700; color: var(--color-navy); margin-bottom: 10px; }
+.signin-tagline { font-size: 13px; color: var(--color-text-sub); margin-bottom: 32px; letter-spacing: .03em; }
+.signin-desc { color: var(--color-text-sub); line-height: 1.7; margin-bottom: 32px; }
+.signin-note { color: var(--color-text-sub); font-size: 11px; margin-top: 12px; }
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: all 0.15s;
+  font-family: var(--font-main);
+}
+.btn-primary {
+  background: var(--color-primary); color: white;
+}
+.btn-primary:hover { background: #0d47a1; transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.btn-primary:active { transform: translateY(0); }
+.btn-outline {
+  background: transparent; color: var(--color-text);
+  border: 1.5px solid var(--color-border);
+}
+.btn-outline:hover { background: var(--color-hover); border-color: var(--color-primary); color: var(--color-primary); }
+.btn-google { width: 100%; padding: 12px 20px; font-size: 14px; }
+.btn-google + .btn { width: 100%; margin-top: 12px; }
+
+/* ============================================================
+   Header
+   ============================================================ */
+.top-header {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--header-h);
+  background: var(--color-navy);
+  display: flex; align-items: center;
+  padding: 0 20px;
+  gap: 20px;
+  box-shadow: 0 2px 8px rgba(8,37,88,.3);
+}
+
+.header-brand {
+  display: flex; align-items: center; gap: 8px;
+  flex: 1;
+}
+.brand-icon { font-size: 20px; }
+.brand-name {
+  font-size: 15px; font-weight: 700;
+  color: white; white-space: nowrap;
+}
+.demo-badge {
+  background: var(--color-yellow); color: var(--color-navy);
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px;
+  letter-spacing: .05em;
+}
+
+.header-nav {
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.1); color: white;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--radius-sm); cursor: pointer;
+  transition: background 0.15s;
+}
+.nav-btn:hover { background: rgba(255,255,255,.2); }
+.week-label-btn {
+  background: rgba(255,255,255,.1); color: white;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--radius-sm);
+  padding: 5px 12px; font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: var(--font-main);
+  transition: background 0.15s;
+}
+.week-label-btn:hover { background: rgba(255,255,255,.2); }
+.week-label {
+  color: white; font-size: 14px; font-weight: 600;
+  min-width: 180px; text-align: center;
+  white-space: nowrap;
+}
+
+.header-controls {
+  display: flex; align-items: center; gap: 8px; justify-content: flex-end;
+  flex: 1;
+}
+.toggle-group {
+  display: flex;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,.25);
+  overflow: hidden;
+}
+.toggle-btn {
+  padding: 5px 11px; font-size: 11px; font-weight: 600;
+  background: transparent; color: rgba(255,255,255,.65);
+  border: none; cursor: pointer;
+  font-family: var(--font-main);
+  transition: all 0.15s; white-space: nowrap;
+}
+.toggle-btn:hover { color: white; background: rgba(255,255,255,.12); }
+.toggle-btn.active { background: rgba(255,255,255,.22); color: white; }
+
+.header-legend {
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  color: rgba(255,255,255,.85); font-size: 12px;
+}
+.legend-dot {
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: white;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Calendar Layout
+   ============================================================ */
+.calendar-wrapper {
+  height: calc(100vh - var(--header-h));
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+/* 日付ヘッダー行 */
+.date-header {
+  display: flex;
+  background: var(--color-white);
+  border-bottom: 2px solid var(--color-border);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+.date-header-time {
+  width: var(--time-col-w);
+  flex-shrink: 0;
+  border-right: 1px solid var(--color-border);
+}
+.date-header-day {
+  flex: 1;
+  padding: 10px 8px 8px;
+  text-align: center;
+  border-right: 1px solid var(--color-border);
+  min-height: 78px;
+}
+.date-header-day:last-child { border-right: none; }
+.date-day-name {
+  font-size: 11px; color: var(--color-text-sub); font-weight: 500;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.date-day-num {
+  font-size: 22px; font-weight: 700; color: var(--color-navy);
+  line-height: 1.2; margin-top: 2px;
+}
+.date-holiday-name {
+  font-size: 10px; color: var(--color-danger); font-weight: 600;
+  margin-top: 3px; min-height: 14px; line-height: 1.3;
+}
+.date-header-day.today .date-day-num {
+  color: #fff;
+  background: var(--color-navy);
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 2px auto 0;
+}
+.date-header-day.today .date-day-name { color: var(--color-navy); }
+.date-header-day.holiday .date-day-num { color: var(--color-danger); }
+.date-header-day.holiday .date-day-name { color: var(--color-danger); }
+.date-header-day.weekend { opacity: .5; }
+
+/* カレンダー本体 */
+.calendar-body {
+  display: flex;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.calendar-body::-webkit-scrollbar { width: 6px; }
+.calendar-body::-webkit-scrollbar-track { background: var(--color-bg); }
+.calendar-body::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+/* 時間ラベル列 */
+.time-column {
+  width: var(--time-col-w);
+  flex-shrink: 0;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-white);
+}
+.time-label {
+  height: var(--slot-h);
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 10px;
+  font-size: 11px; font-weight: 500; color: var(--color-text-sub);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.time-label.hour { color: var(--color-text); font-weight: 600; font-size: 12px; }
+.time-label.lunch { color: var(--color-text-sub); }
+
+/* スロットグリッド */
+.slots-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+.day-column {
+  border-right: 1px solid var(--color-border);
+  display: flex; flex-direction: column;
+}
+.day-column:last-child { border-right: none; }
+
+/* 各スロット */
+.time-slot {
+  height: var(--slot-h);
+  border-bottom: 1px solid var(--color-border);
+  padding: 3px 4px;
+  background: var(--color-white);
+  cursor: default;
+  position: relative;
+}
+.time-slot.hour-start { border-top: 1px solid #c8d4e8; }
+.time-slot.lunch {
+  background: #fafafa;
+  pointer-events: none;
+}
+.time-slot.lunch::after {
+  content: '昼休憩';
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px; color: var(--color-text-sub);
+  white-space: nowrap;
+}
+.time-slot.holiday-blocked {
+  background: #fff5f5;
+  pointer-events: none;
+}
+
+/* ============================================================
+   スロットボタン（統一デザイン）
+   ============================================================ */
+.slot-btn {
+  width: 100%; height: 100%;
+  background: #d6eef8;
+  border: none; border-radius: 6px;
+  cursor: pointer;
+  padding: 6px 10px;
+  display: flex; flex-direction: column;
+  align-items: flex-start; justify-content: center;
+  gap: 3px;
+  font-family: var(--font-main);
+  text-align: left;
+  transition: background 0.12s, transform 0.1s;
+}
+.slot-btn:hover { background: #b8dfef; transform: scale(1.01); }
+.slot-btn:active { transform: scale(0.98); }
+
+.slot-time-text {
+  font-size: 12px; font-weight: 700;
+  color: var(--color-navy); white-space: nowrap;
+  line-height: 1.3;
+}
+
+.slot-avatars-row {
+  display: flex; flex-direction: row;
+  gap: 4px; flex-wrap: wrap;
+}
+.slot-avatar-sm {
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  font-size: 10px; font-weight: 700;
+  color: white;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0; white-space: nowrap;
+}
+
+/* ============================================================
+   Booking Page (full-screen, TimeRex style)
+   ============================================================ */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.booking-page {
+  position: fixed; inset: 0; z-index: 500;
+  background: #f5f7fc;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease;
+}
+
+/* ブランドバー */
+.booking-brand-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 24px;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky; top: 0; z-index: 10;
+}
+.booking-brand-icon { font-size: 18px; }
+.booking-brand-name { font-size: 14px; font-weight: 700; color: var(--color-navy); }
+.booking-brand-by { font-size: 12px; color: var(--color-text-sub); margin-left: 2px; }
+
+.booking-container {
+  max-width: 600px;
+  margin: 32px auto;
+  padding: 40px 48px 52px;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  animation: slideUp 0.25s ease;
+}
+
+@media (max-width: 680px) {
+  .booking-container { margin: 0; border-radius: 0; padding: 28px 20px 48px; box-shadow: none; }
+}
+
+/* ステップインジケーター */
+.step-indicator {
+  display: flex; align-items: center;
+  margin-bottom: 36px;
+}
+.step {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  flex-shrink: 0;
+}
+.step-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  background: var(--color-border); color: var(--color-text-sub);
+  border: 2px solid var(--color-border);
+}
+.step.done .step-circle {
+  background: var(--color-primary); color: white; border-color: var(--color-primary);
+}
+.step.active .step-circle {
+  background: var(--color-white); color: var(--color-primary);
+  border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(17,85,204,.15);
+}
+.step-label {
+  font-size: 11px; font-weight: 500; color: var(--color-text-sub);
+  white-space: nowrap;
+}
+.step.done .step-label,
+.step.active .step-label { color: var(--color-primary); font-weight: 600; }
+.step-line {
+  flex: 1; height: 2px; margin: 0 8px; margin-bottom: 16px;
+  background: var(--color-border);
+}
+.step.done + .step-line { background: var(--color-primary); }
+
+/* フォームセクション */
+.form-section { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.form-label-lg {
+  font-size: 14px; font-weight: 600; color: var(--color-navy);
+  display: flex; align-items: center; gap: 6px;
+}
+.hissu {
+  font-size: 10px; font-weight: 700;
+  background: var(--color-danger); color: white;
+  padding: 2px 6px; border-radius: 3px;
+  letter-spacing: .03em;
+}
+
+/* 日程カード */
+.datetime-card {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.datetime-main {
+  font-size: 16px; font-weight: 700; color: var(--color-navy);
+}
+.datetime-tz {
+  font-size: 11px; color: var(--color-text-sub); margin-top: 3px;
+}
+.btn-back-date {
+  background: none; border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px; font-size: 12px; font-weight: 500;
+  color: var(--color-primary); cursor: pointer;
+  font-family: var(--font-main); white-space: nowrap;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.btn-back-date:hover { background: var(--color-hover); border-color: var(--color-primary); }
+
+/* テキスト入力 */
+.form-input-lg {
+  padding: 14px 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 15px; font-family: var(--font-main);
+  color: var(--color-text); background: var(--color-white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none; width: 100%;
+}
+.form-input-lg:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(17,85,204,.1);
+}
+.form-input-lg::placeholder { color: #c0c6ce; }
+
+.form-textarea {
+  padding: 14px 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 15px; font-family: var(--font-main);
+  color: var(--color-text); background: var(--color-white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none; width: 100%; resize: vertical;
+  min-height: 100px;
+}
+.form-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(17,85,204,.1);
+}
+.form-textarea::placeholder { color: #c0c6ce; }
+
+/* 担当者選択グリッド */
+.member-select-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.member-select-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  border: 2px solid var(--color-border);
+  border-radius: 20px;
+  cursor: pointer; background: var(--color-white);
+  font-size: 14px; font-weight: 500;
+  transition: all 0.15s; font-family: var(--font-main);
+  color: var(--color-text);
+}
+.member-select-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.member-select-btn.selected { border-color: transparent; color: white; }
+.member-select-btn.busy { opacity: .4; cursor: not-allowed; }
+.member-select-btn .btn-dot {
+  height: 20px; padding: 0 7px; border-radius: 10px;
+  font-size: 10px; font-weight: 700; color: white;
+  display: inline-flex; align-items: center; justify-content: center;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* 完了画面 */
+.booking-success-container { }
+.success-body {
+  display: flex; flex-direction: column; align-items: center;
+  padding-top: 8px;
+}
+.success-icon-wrap {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: #e8f5e9; border: 3px solid var(--color-success);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+}
+.success-check {
+  font-size: 32px; color: var(--color-success); font-weight: 700; line-height: 1;
+}
+.success-title {
+  font-size: 22px; font-weight: 700; color: var(--color-navy);
+  margin-bottom: 8px; text-align: center;
+}
+.success-sub {
+  font-size: 13px; color: var(--color-text-sub); margin-bottom: 28px; text-align: center;
+}
+.success-detail-card {
+  width: 100%;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.success-detail-row {
+  display: flex; align-items: baseline;
+  padding: 14px 20px; gap: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+.success-detail-row:last-child { border-bottom: none; }
+.success-detail-label {
+  font-size: 12px; font-weight: 600; color: var(--color-text-sub);
+  min-width: 60px; flex-shrink: 0;
+}
+.success-detail-val {
+  font-size: 14px; font-weight: 500; color: var(--color-navy);
+}
+.btn-back-to-top {
+  background: none; border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 24px; font-size: 13px; font-weight: 600;
+  color: var(--color-text-sub); cursor: pointer;
+  font-family: var(--font-main); transition: all 0.15s;
+}
+.btn-back-to-top:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+/* フォームフッター */
+.form-footer { margin-top: 8px; }
+.terms-text {
+  font-size: 12px; color: var(--color-text-sub);
+  margin-bottom: 12px; text-align: center;
+}
+.terms-link { color: var(--color-primary); text-decoration: none; }
+.terms-link:hover { text-decoration: underline; }
+
+.btn-submit {
+  width: 100%; padding: 16px;
+  background: var(--color-cyan); color: white;
+  border: none; border-radius: var(--radius-md);
+  font-size: 15px; font-weight: 700;
+  font-family: var(--font-main); cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  letter-spacing: .02em;
+}
+.btn-submit:hover {
+  background: #0090c5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,162,218,.35);
+}
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+/* ============================================================
+   Toast Notification
+   ============================================================ */
+.toast {
+  position: fixed; bottom: 28px; right: 28px; z-index: 600;
+  background: var(--color-navy);
+  color: white;
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow-lg);
+  min-width: 280px;
+  animation: slideInRight 0.3s ease;
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.toast-icon { font-size: 20px; }
+.toast-title { font-weight: 700; font-size: 14px; }
+.toast-msg { font-size: 12px; color: rgba(255,255,255,.75); margin-top: 2px; }
+
+/* ============================================================
+   Members Modal
+   ============================================================ */
+.members-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.1); color: white;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--radius-sm); cursor: pointer;
+  transition: background 0.15s; flex-shrink: 0; margin-left: 8px;
+}
+.members-btn:hover { background: rgba(255,255,255,.2); }
+.signout-header-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.1); color: white;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--radius-sm); cursor: pointer;
+  transition: background 0.15s; flex-shrink: 0; margin-left: 8px;
+}
+.signout-header-btn:hover { background: rgba(224,79,36,.5); }
+
+.members-overlay {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(8,37,88,.45);
+  display: flex; align-items: center; justify-content: center;
+}
+.members-card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  width: 500px; max-width: 95vw;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.members-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+.members-card-title { font-size: 16px; font-weight: 700; color: var(--color-navy); }
+.members-card-close {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--color-text-sub); font-size: 16px; border-radius: 4px;
+}
+.members-card-close:hover { background: var(--color-bg); }
+
+.members-list { padding: 8px 24px; max-height: 280px; overflow-y: auto; }
+.member-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--color-border);
+}
+.member-row:last-child { border-bottom: none; }
+.member-row-badge {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.member-row-info { flex: 1; min-width: 0; }
+.member-row-name { display: block; font-size: 13px; font-weight: 600; color: var(--color-navy); }
+.member-row-email { display: block; font-size: 11px; color: var(--color-text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.member-conn-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.member-conn-dot.connected    { background: var(--color-success); }
+.member-conn-dot.disconnected { background: #fbbf24; }
+.member-conn-label {
+  font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.member-conn-label.connected    { background: #d1fae5; color: #065f46; }
+.member-conn-label.disconnected { background: #fef3c7; color: #92400e; }
+
+.member-row-del {
+  background: none; border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm); padding: 4px 10px;
+  font-size: 11px; color: var(--color-text-sub); cursor: pointer;
+  font-family: var(--font-main); transition: all 0.15s; flex-shrink: 0;
+}
+.member-row-del:hover { border-color: var(--color-danger); color: var(--color-danger); }
+
+.members-add {
+  padding: 16px 24px; border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+.members-add-title { font-size: 13px; font-weight: 600; color: var(--color-navy); margin-bottom: 10px; }
+.members-add-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: center; }
+.members-input {
+  flex: 1; padding: 8px 12px;
+  border: 1.5px solid var(--color-border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: var(--font-main); color: var(--color-text);
+  background: var(--color-white); outline: none; min-width: 0;
+  text-align: center;
+}
+.members-url-spacer { flex: 1; min-width: 0; }
+.members-input:focus { border-color: var(--color-primary); }
+.members-add-btn {
+  padding: 8px 16px; background: var(--color-primary); color: white;
+  border: none; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: var(--font-main); white-space: nowrap; transition: background 0.15s;
+}
+.members-add-btn:hover { background: #0d47a1; }
+.members-note { font-size: 11px; color: var(--color-text-sub); margin-top: 8px; line-height: 1.5; }
+.members-url-row { margin-top: 8px; }
+
+.members-card-footer {
+  padding: 14px 24px; border-top: 1px solid var(--color-border);
+  display: flex; justify-content: flex-end;
+}
+.members-signout-btn {
+  background: none; border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm); padding: 7px 16px;
+  font-size: 12px; font-weight: 600; color: var(--color-text-sub);
+  cursor: pointer; font-family: var(--font-main); transition: all 0.15s;
+}
+.members-signout-btn:hover { border-color: var(--color-danger); color: var(--color-danger); }
+
+/* ============================================================
+   Utilities
+   ============================================================ */
+.hidden { display: none !important; }
+
+/* 空き枠なしの日カラム */
+.no-available-day { opacity: .6; }
+
+/* スクロール位置のガイドライン（現在時刻） */
+.current-time-line {
+  position: absolute; left: 0; right: 0;
+  height: 2px; background: var(--color-danger);
+  pointer-events: none; z-index: 10;
+}
+.current-time-line::before {
+  content: '';
+  position: absolute; left: -4px; top: -4px;
+  width: 10px; height: 10px;
+  background: var(--color-danger); border-radius: 50%;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 768px) {
+  :root { --slot-h: 44px; --time-col-w: 48px; }
+  .header-legend { display: none; }
+  .week-label { font-size: 12px; min-width: 140px; }
+  .brand-name { font-size: 13px; }
+  .modal-content { width: 95vw; }
+}
