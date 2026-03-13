@@ -737,7 +737,7 @@ async function handleBooking() {
       }
       // カレンダーイベントにメール送信状況を追記（失敗時はタイトルにも反映）
       try {
-        const baseDesc = `【顧客名】${companyName ? companyName + ' ' : ''}${customerName}様\n【部署名・役職名】${customerDept || ''}${customerTitle ? ' ' + customerTitle : ''}\n【電話番号】${customerPhone || ''}\n【メールアドレス】${customerEmail || ''}${comment ? '\n【コメント】' + comment : ''}`;
+        const baseDesc = `【会社名】${companyName || ''}\n【顧客名】${customerName}様\n【部署名・役職名】${customerDept || ''}${customerTitle ? ' ' + customerTitle : ''}\n【電話番号】${customerPhone || ''}\n【メールアドレス】${customerEmail || ''}${comment ? '\n【コメント】' + comment : ''}`;
         const patchBody = {
           description: baseDesc + '\n\n' + mailStatus,
         };
@@ -801,7 +801,7 @@ async function createCalendarEvent({ title, startISO, endISO, memberEmail, custo
 
   const event = {
     summary: title,
-    description: `【顧客名】${companyName ? companyName + ' ' : ''}${customerName}様\n【部署名・役職名】${customerDept || ''}${customerTitle ? ' ' + customerTitle : ''}\n【電話番号】${customerPhone || ''}\n【メールアドレス】${customerEmail || ''}${comment ? '\n【コメント】' + comment : ''}`,
+    description: `【会社名】${companyName || ''}\n【顧客名】${customerName}様\n【部署名・役職名】${customerDept || ''}${customerTitle ? ' ' + customerTitle : ''}\n【電話番号】${customerPhone || ''}\n【メールアドレス】${customerEmail || ''}${comment ? '\n【コメント】' + comment : ''}`,
     start: { dateTime: startISO, timeZone: 'Asia/Tokyo' },
     end:   { dateTime: endISO,   timeZone: 'Asia/Tokyo' },
     attendees,
