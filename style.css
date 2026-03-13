@@ -25,7 +25,7 @@
 
   --header-h: 64px;
   --slot-h: 60px;
-  --time-col-w: 64px;
+  --time-col-w: 38px;
 }
 
 /* ============================================================
@@ -283,13 +283,13 @@ html, body {
 }
 .time-label {
   height: var(--slot-h);
-  display: flex; align-items: center; justify-content: flex-end;
-  padding-right: 10px;
-  font-size: 11px; font-weight: 500; color: var(--color-text-sub);
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+  font-size: 10px; font-weight: 500; color: var(--color-text-sub);
   border-bottom: 1px solid var(--color-border);
   white-space: nowrap;
 }
-.time-label.hour { color: var(--color-text); font-weight: 600; font-size: 12px; }
+.time-label.hour { color: var(--color-text); font-weight: 600; font-size: 10px; }
 .time-label.lunch { color: var(--color-text-sub); }
 
 /* スロットグリッド */
@@ -781,7 +781,7 @@ html, body {
    Responsive
    ============================================================ */
 @media (max-width: 768px) {
-  :root { --slot-h: 44px; --time-col-w: 48px; }
+  :root { --slot-h: 44px; --time-col-w: 34px; }
   .header-legend { display: none; }
   .week-label { font-size: 12px; min-width: 140px; }
   .brand-name { font-size: 13px; }
