@@ -226,7 +226,7 @@ html, body {
   border-bottom: 2px solid var(--color-border);
   flex-shrink: 0;
   box-shadow: var(--shadow-sm);
-  overflow-x: hidden;
+  padding-right: 6px; /* スクロールバー幅に合わせて列を揃える */
 }
 .date-header-time {
   width: var(--time-col-w);
