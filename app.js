@@ -136,7 +136,7 @@ window.addEventListener('DOMContentLoaded', () => {
   state.currentMonday = getMonday(new Date());
   // 初期スロット高さを設定
   if (state.slotMinutes === 60) {
-    document.documentElement.style.setProperty('--slot-h', '112px');
+    document.documentElement.style.setProperty('--slot-h', '80px');
   }
   processUrlParams(); // URLパラメータからメンバー追加
   renderLegend();
@@ -176,7 +176,7 @@ window.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       state.slotMinutes = parseInt(btn.dataset.slot);
       document.querySelectorAll('[data-slot]').forEach(b => b.classList.toggle('active', b === btn));
-      const slotH = state.slotMinutes === 60 ? '112px' : '56px';
+      const slotH = state.slotMinutes === 60 ? '80px' : '56px';
       document.documentElement.style.setProperty('--slot-h', slotH);
       loadAndRender();
     });
@@ -518,9 +518,13 @@ function renderSlots() {
 
         if (available.length > 0 && (state.authReady || Object.keys(state.busyData).length > 0)) {
           const btn = document.createElement('button');
-          btn.className = 'slot-btn';
+          const is60 = state.slotMinutes === 60;
           const is2week = state.weekCount === 2;
-          const chipClass = is2week ? 'slot-avatar-xs' : 'slot-avatar-sm';
+          btn.className = 'slot-btn' + (is60 ? ' slot-btn--60' : '');
+          // チップクラス: 60分×1週=md, 60分×2週=sm, 30分×1週=sm, 30分×2週=xs
+          const chipClass = is60 && !is2week ? 'slot-avatar-md'
+                          : is2week          ? 'slot-avatar-xs'
+                          :                    'slot-avatar-sm';
           const avatars = available.map(m =>
             `<span class="${chipClass}" style="background:${m.color}">${is2week ? m.lastName[0] : m.lastName}</span>`
           ).join('');

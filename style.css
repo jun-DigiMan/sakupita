@@ -383,6 +383,24 @@ html, body {
   display: inline-flex; align-items: center; justify-content: center;
   flex-shrink: 0; white-space: nowrap;
 }
+.slot-avatar-md {
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 11px;
+  font-size: 12px; font-weight: 700;
+  color: white;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0; white-space: nowrap;
+}
+
+/* 60分スロット用レイアウト */
+.slot-btn--60 {
+  padding: 8px 8px;
+  gap: 4px;
+}
+.slot-btn--60 .slot-time-text {
+  font-size: 14px;
+}
 
 /* ============================================================
    Booking Page (full-screen, TimeRex style)
