@@ -215,14 +215,28 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('back-to-calendar').addEventListener('click', closeModal);
 
   // 名前: フォーカスを外した時にスペース正規化（全角→半角、なし→苗字辞書で自動分割）
-  document.getElementById('customer-name').addEventListener('blur', () => {
-    const el = document.getElementById('customer-name');
-    let v = el.value.replace(/　/g, ' ').replace(/ +/g, ' ').trim();
+  const nameEl = document.getElementById('customer-name');
+  nameEl.addEventListener('blur', () => {
+    let v = nameEl.value.replace(/　/g, ' ').replace(/ +/g, ' ').trim();
     if (v.length > 1 && !/[ ]/.test(v)) {
       const email = document.getElementById('customer-email').value.trim();
       v = splitJapaneseName(v, email);
+      nameEl.dataset.autoSplit = '1'; // メール未入力の場合は再判定フラグ
+    } else {
+      nameEl.dataset.autoSplit = ''; // 手動入力はフラグ解除
     }
-    el.value = v;
+    nameEl.value = v;
+  });
+
+  // メール: 入力後に名前の自動分割を再判定（名前が先に入力されている場合）
+  document.getElementById('customer-email').addEventListener('blur', () => {
+    const email = document.getElementById('customer-email').value.trim();
+    if (!email || !nameEl.dataset.autoSplit) return;
+    const raw = nameEl.value.replace(/\s/g, '');
+    if (raw.length > 1) {
+      nameEl.value = splitJapaneseName(raw, email);
+      nameEl.dataset.autoSplit = '';
+    }
   });
 
   // 電話番号: フォーカスを外した時に半角ハイフン形式に自動整形
