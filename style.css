@@ -903,23 +903,40 @@ html, body {
   }
 
   /* ---- Header ---- */
-  .top-header { padding: 0 8px; gap: 4px; height: var(--header-h); }
+  .top-header {
+    padding: 6px 8px;
+    gap: 4px;
+    height: auto;
+    min-height: var(--header-h);
+    flex-wrap: wrap;
+  }
   /* ブランドは最小幅に縮める */
-  .header-brand { flex: 0 0 auto; gap: 4px; }
+  .header-brand { flex: 0 0 auto; gap: 4px; order: 1; }
   .brand-name { display: none; }
   .brand-icon { font-size: 28px; }
-  .logo-img--header { height: 44px; }
+  .logo-img--header { height: 40px; }
   /* ナビを中央に伸ばす */
-  .header-nav { flex: 1; justify-content: center; gap: 4px; }
+  .header-nav { flex: 1; justify-content: center; gap: 4px; order: 2; }
   .week-label { font-size: 10px; min-width: 0; white-space: nowrap; }
   .week-label-btn { height: 28px; padding: 0 7px; font-size: 10px; }
   .nav-btn { width: 28px; height: 28px; }
-  /* コントロールは固定幅 */
-  .header-controls { flex: 0 0 auto; gap: 4px; }
+  /* コントロール: 2行目として全幅表示 */
+  .header-controls {
+    flex: 0 0 100%;
+    order: 3;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 2px 0 4px;
+  }
   .header-legend { display: none; }
-  .toggle-group { display: none; }
+  /* トグルボタンをモバイルでも表示（小さく） */
+  .toggle-group { display: flex; }
+  .toggle-btn { font-size: 11px; padding: 4px 8px; }
   .members-btn,
   .signout-header-btn { width: 28px; height: 28px; margin-left: 0; }
+  /* カレンダーの高さをヘッダーの実際の高さに合わせる */
+  .calendar-wrapper { height: calc(100vh - 96px); }
 
   /* ---- Date header ---- */
   .date-header-day { padding: 5px 2px 4px; min-height: 58px; }
@@ -950,11 +967,17 @@ html, body {
   /* ---- Modal (メンバー管理) ---- */
   .modal-content { width: 100vw; max-width: 100vw; border-radius: var(--radius-md) var(--radius-md) 0 0; margin-top: auto; max-height: 85vh; overflow-y: auto; }
   .modal-overlay { align-items: flex-end; }
-  .members-add-row { grid-template-columns: 1fr auto; gap: 6px; }
-  .members-add-row > input:first-child { display: none; }
-  .members-input { font-size: 12px; padding: 7px 10px; }
-  .members-add-btn { padding: 7px 12px; font-size: 12px; }
-  .members-url-row .members-input { font-size: 11px; }
+  /* メンバー追加行: 縦積みレイアウト */
+  .members-add-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .members-input { font-size: 12px; padding: 7px 10px; width: 100%; }
+  .members-add-btn { padding: 8px 12px; font-size: 12px; width: 100%; }
+  /* 連携URL行のスペーサーを非表示 */
+  .members-url-spacer { display: none; }
+  .members-url-row .members-input { font-size: 11px; width: 100%; }
 
   /* ---- Sign-in screen ---- */
   .signin-card { width: 90vw; padding: 32px 24px; }
