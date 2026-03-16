@@ -905,19 +905,20 @@ html, body {
   /* ---- Header ---- */
   .top-header {
     padding: 6px 8px;
-    gap: 4px;
+    gap: 6px;
     height: auto;
     min-height: var(--header-h);
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
   }
-  /* ブランドは1行目左端・縦中央 */
-  .header-brand { flex: 0 0 auto; gap: 4px; order: 1; align-items: center; align-self: center; }
+  /* ブランド：1行目に入れてauto幅 */
+  .header-brand { flex: 0 0 auto; gap: 4px; order: 1; display: flex; align-items: center; }
   .brand-name { display: none; }
   .brand-icon { font-size: 28px; }
-  .logo-img--header { height: 32px; }
-  /* ナビを中央に伸ばす（1行目）・縦中央 */
-  .header-nav { flex: 1; justify-content: center; gap: 4px; order: 2; align-items: center; align-self: center; }
+  .logo-img--header { height: 30px; }
+  /* ナビ：auto幅で中央揃え */
+  .header-nav { flex: 0 0 auto; justify-content: center; gap: 4px; order: 2; display: flex; align-items: center; }
   .week-label { font-size: 10px; min-width: 0; white-space: nowrap; }
   .week-label-btn { height: 28px; padding: 0 7px; font-size: 10px; }
   .nav-btn { width: 28px; height: 28px; }
@@ -956,25 +957,27 @@ html, body {
   .time-label { font-size: 9px; padding: 0 2px; }
   .time-label.hour { font-size: 9px; }
 
+  /* ---- Time slot padding 削減（2週間列幅確保） ---- */
+  .time-slot { padding: 1px 1px; }
   /* ---- Slot buttons（全4パターン対応） ---- */
-  .slot-btn { padding: 2px 2px; border-radius: 3px; gap: 1px; border-left-width: 2px; overflow: hidden; width: 100%; min-width: 0; }
-  .slot-btn--60 { padding: 3px 2px; gap: 2px; }
-  /* 時間テキスト：overflow:hiddenで切り捨て */
+  .slot-btn { padding: 2px 2px; border-radius: 3px; gap: 1px; border-left-width: 2px; overflow: hidden; width: 100%; min-width: 0; box-sizing: border-box; }
+  .slot-btn--60 { padding: 2px 2px; gap: 2px; }
+  /* 時間テキスト */
   .slot-time-text {
     font-size: 7px; font-weight: 700;
     overflow: hidden; white-space: nowrap;
     max-width: 100%; display: block;
   }
-  /* 60分も同じサイズに上書き */
   .slot-btn--60 .slot-time-text { font-size: 7px; }
   .slot-avatars-row { gap: 1px; overflow: hidden; min-width: 0; flex-wrap: nowrap; }
   /* 1週（列幅~65px）用アバター */
   .slot-avatar-sm  { height: 13px; padding: 0 3px; font-size: 7px; border-radius: 7px; flex-shrink: 0; }
   .slot-avatar-md  { height: 16px; padding: 0 4px; font-size: 8px; border-radius: 8px; flex-shrink: 0; }
-  /* 2週（列幅~33px）用アバター：2名収まるよう12-13pxに縮小 */
-  .slot-avatar-xs        { height: 10px; padding: 0 2px; font-size: 6px; border-radius: 5px; flex-shrink: 0; }
+  /* 2週（列幅~33px、time-slot padding 1px×2=2px、btn padding 2px×2=4px → 有効幅27px）*/
+  /* 2名: 12px + 1px + 12px = 25px ≤ 27px ✓ */
+  .slot-avatar-xs        { height: 11px; padding: 0 2px; font-size: 6px; border-radius: 5px; flex-shrink: 0; }
   .slot-avatar-circle    { width: 12px; height: 12px; font-size: 6px; flex-shrink: 0; }
-  .slot-avatar-circle-lg { width: 13px; height: 13px; font-size: 6px; flex-shrink: 0; }
+  .slot-avatar-circle-lg { width: 12px; height: 12px; font-size: 6px; flex-shrink: 0; }
 
   /* ---- Booking form ---- */
   .booking-container { margin: 0; border-radius: 0; padding: 20px 16px 40px; box-shadow: none; }
