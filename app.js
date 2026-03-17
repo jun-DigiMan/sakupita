@@ -798,6 +798,13 @@ async function handleBooking() {
       // 確認メール送信 → バウンス確認 → 成否をカレンダーに記録
       let mailStatus = '';
       const bookingId = generateBookingId();
+      const appUrl = window.location.origin + window.location.pathname;
+      const rescheduleLink = `${appUrl}?reschedule=${bookingId}`;
+      const meetUrl = zoomPmi
+        ? (zoomPmi.startsWith('http') ? zoomPmi : `https://zoom.us/j/${zoomPmi.replace(/\D/g, '')}`)
+        : (created.meetUrl || '');
+      const sheetId = CONFIG.SHEET_ID || localStorage.getItem('sakupita_sheet_id') || '';
+      const sheetUrl = sheetId ? `https://docs.google.com/spreadsheets/d/${sheetId}` : '';
       try {
         const { date, hour, min, endH, endM } = state.selectedSlot;
         const fmt = (h, m) => `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
@@ -812,13 +819,6 @@ async function handleBooking() {
           dateLabel, startISO,
         };
         saveBookingLocally(bookingId, bookingData);
-        const appUrl = window.location.origin + window.location.pathname;
-        const rescheduleLink = `${appUrl}?reschedule=${bookingId}`;
-        const meetUrl = zoomPmi
-          ? (zoomPmi.startsWith('http') ? zoomPmi : `https://zoom.us/j/${zoomPmi.replace(/\D/g, '')}`)
-          : (created.meetUrl || '');
-        const sheetId = CONFIG.SHEET_ID || localStorage.getItem('sakupita_sheet_id') || '';
-        const sheetUrl = sheetId ? `https://docs.google.com/spreadsheets/d/${sheetId}` : '';
         await sendConfirmationEmails({
           customerName, companyName, customerEmail,
           memberName:  state.selectedMember.name,
