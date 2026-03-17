@@ -1129,38 +1129,13 @@ async function initSpreadsheet() {
 
 // ---------- スプレッドシート連携 ----------
 async function appendToSheet({ companyName, customerName, customerDept, customerTitle, customerPhone, customerEmail, sentDate, meetingDate, comment, bookingId, eventId, memberName, memberEmail, startISO, meetUrl, isReschedule }) {
-  let sheetId = CONFIG.SHEET_ID || localStorage.getItem('sakupita_sheet_id');
-
-  if (!sheetId) {
-    // 初回: スプレッドシートを自動作成
-    const created = await gapi.client.request({
-      path: 'https://sheets.googleapis.com/v4/spreadsheets',
-      method: 'POST',
-      body: {
-        properties: { title: '【サクピタ】顧客管理表' },
-        sheets: [{ properties: { title: 'Sheet1' } }],
-      },
-    });
-    sheetId = created.result.spreadsheetId;
-    localStorage.setItem('sakupita_sheet_id', sheetId);
-    CONFIG.SHEET_ID = sheetId;
-  }
-
-  // initSpreadsheet で初期化済みのはずだが念のため実行
-  await initSpreadsheet();
-
-  // シートタブ名を取得してデータ追記
-  const meta2 = await gapi.client.request({
-    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`,
-    params: { fields: 'sheets.properties' },
-  });
-  const tabTitle = meta2.result.sheets?.[0]?.properties?.title || 'Sheet1';
-  const range = encodeURIComponent(tabTitle);
+  const sheetId = CONFIG.SHEET_ID || localStorage.getItem('sakupita_sheet_id');
+  if (!sheetId) throw new Error('SHEET_ID が未設定です');
 
   await gapi.client.request({
-    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}!A1:append`,
+    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:append`,
     method: 'POST',
-    params: { valueInputOption: 'USER_ENTERED' },
+    params: { valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS' },
     body: { values: [[companyName, customerName, customerDept, customerTitle, customerPhone, customerEmail, sentDate, meetingDate, comment, memberName || '', memberEmail || '', bookingId || '', eventId || '', startISO || '', isReschedule ? '日程変更' : '新規予約', meetUrl || '']] },
   });
 }
