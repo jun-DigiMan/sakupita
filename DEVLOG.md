@@ -337,6 +337,14 @@ SHEET_ID        // スプレッドシートID（固定）
 
 ## 変更履歴
 
+### 2026-03-18
+- **スプシ書き込みバグ修正（スコープ問題）**: `meetUrl` / `sheetUrl` / `rescheduleLink` が emailの `try` ブロック内で宣言されており、スプシ書き込みブロックから参照できず `ReferenceError` が発生していた。各変数を `try` の外（`bookingId` と同じスコープ）に移動して解決
+- **G列ヘッダー変更**: `メール送信日` → `メール送信日時` に変更。値も `YYYY/M/D HH:MM` の日時形式で出力するよう修正
+- **スプシヘッダー中央揃え**: `initSpreadsheet()` のbatchUpdateにヘッダー行の `horizontalAlignment: CENTER` 設定を追加。ログイン時に自動適用
+- **デバッグコード削除（リリース前クリーンアップ）**: `📊テスト` ボタン（index.html）・`testSheetWrite()` 関数（app.js）を削除。スプシ書き込みエラー時の `alert()` を削除（コンソールのみに変更）
+- **`prompt()` キャンセル時のNaNバグ修正**: 複数メールアドレス選択ダイアログでキャンセル時に `parseInt(null)` = NaN になる問題を `if (choice === null) return;` で修正
+- **予約可能スロットの時間制限**: 現在時刻+3時間以前のスロットを非表示に。過去日・本日の直近3時間は選択不可。1分ごとの自動更新タイマーにより時間経過とともにリアルタイム消し込み
+
 ### 2026-03-17
 - **松居和輝 Zoom PMI 登録**: `config.js` の `zoomPmi` に正式URLを追加
 - **meetDefault フィールド追加**: メンバーごとにデフォルト会議ツールを設定できるよう `meetDefault: 'zoom' | 'meet'` フィールドを新設
