@@ -654,8 +654,8 @@ function updateMeetingTypeUI(member) {
   const hasPmi = !!(member?.zoomPmi);
   const btns = document.querySelectorAll('.meeting-type-btn');
   btns.forEach(b => b.classList.remove('active'));
-  // PMIが設定されていればZoomをデフォルト選択
-  const defaultType = hasPmi ? 'zoom' : 'meet';
+  // meetDefault が設定されていればそれを使用、なければPMIの有無で判定
+  const defaultType = member?.meetDefault ?? (hasPmi ? 'zoom' : 'meet');
   btns.forEach(b => { if (b.dataset.type === defaultType) b.classList.add('active'); });
   document.getElementById('zoom-custom-url-wrap').classList.add('hidden');
 }

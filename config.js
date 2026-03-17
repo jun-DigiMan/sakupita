@@ -18,8 +18,8 @@ const CONFIG = {
   // color: カレンダー表示色
   // ----------------------------------------------------------
   MEMBERS: [
-    { name: '野口純',   lastName: '野口', calendarId: 'j.noguchi@digi-man.com', color: '#222222', zoomPmi: 'https://us06web.zoom.us/j/5755468477?pwd=eoLfxWE956JBAVaUeDBE0YBFDTZV8a.1' },
-    { name: '松居和輝', lastName: '松居', calendarId: 'k.matsui@digi-man.com',  color: '#e04f24', zoomPmi: '' },
+    { name: '野口純',   lastName: '野口', calendarId: 'j.noguchi@digi-man.com', color: '#222222', zoomPmi: 'https://us06web.zoom.us/j/5755468477?pwd=eoLfxWE956JBAVaUeDBE0YBFDTZV8a.1', meetDefault: 'zoom' },
+    { name: '松居和輝', lastName: '松居', calendarId: 'k.matsui@digi-man.com',  color: '#e04f24', zoomPmi: 'https://us06web.zoom.us/j/5497374784?pwd=sTe5QOCeLY9Lh245G7KuEcRByYTLjp.1', meetDefault: 'meet' },
   ],
 
   // Zoom個人ミーティングID設定方法:

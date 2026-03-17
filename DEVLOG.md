@@ -330,6 +330,16 @@ SHEET_ID        // スプレッドシートID（固定）
 
 ## 今後の課題・追加予定
 
-- [ ] 松居和輝のZoom PMI設定
 - [ ] ICSカレンダー招待（顧客のカレンダーアプリに直接追加できる `.ics` ファイル対応）
 - [ ] JP_SURNAMESのさらなる拡充（現在30,685件）
+
+---
+
+## 変更履歴
+
+### 2026-03-17
+- **松居和輝 Zoom PMI 登録**: `config.js` の `zoomPmi` に正式URLを追加
+- **meetDefault フィールド追加**: メンバーごとにデフォルト会議ツールを設定できるよう `meetDefault: 'zoom' | 'meet'` フィールドを新設
+  - 野口純: `meetDefault: 'zoom'`（予約フォームでZoomがデフォルト選択）
+  - 松居和輝: `meetDefault: 'meet'`（Google Meetがデフォルト。ZoomへはUIで切り替え可）
+  - `updateMeetingTypeUI()` を `member.meetDefault` 優先で判定するよう変更
