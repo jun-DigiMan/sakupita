@@ -893,6 +893,7 @@ async function handleBooking() {
       } catch(sheetErr) {
         const msg = sheetErr?.result?.error?.message || sheetErr?.message || JSON.stringify(sheetErr);
         console.error('スプレッドシート記録失敗:', msg, sheetErr);
+        alert('⚠️ スプレッドシート書き込みエラー:\n' + msg);
       }
     }
 
