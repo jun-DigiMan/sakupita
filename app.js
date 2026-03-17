@@ -893,7 +893,6 @@ async function handleBooking() {
       } catch(sheetErr) {
         const msg = sheetErr?.result?.error?.message || sheetErr?.message || JSON.stringify(sheetErr);
         console.error('スプレッドシート記録失敗:', msg, sheetErr);
-        alert('⚠️ スプレッドシート書き込みエラー:\n' + msg);
       }
     }
 
@@ -4196,6 +4195,7 @@ async function resolveCalendarAppUrl(urlStr, input) {
     let selectedEmail = filtered[0];
     if (filtered.length > 1) {
       const choice = prompt(`複数のメールアドレスが見つかりました。番号を選んでください:\n\n${filtered.map((e, i) => `${i+1}: ${e}`).join('\n')}`);
+      if (choice === null) return;
       const idx = parseInt(choice) - 1;
       if (idx >= 0 && idx < filtered.length) selectedEmail = filtered[idx];
     }
@@ -4228,31 +4228,3 @@ function addMemberFromEmail(name, email) {
   loadAndRender();
 }
 
-// ---------- デバッグ: ブラウザコンソールからテスト用書き込み ----------
-window.testSheetWrite = async function() {
-  try {
-    await appendToSheet({
-      companyName: 'テスト株式会社',
-      customerName: 'テスト 太郎',
-      customerDept: '営業部',
-      customerTitle: '部長',
-      customerPhone: '090-0000-0000',
-      customerEmail: 'test@example.com',
-      sentDate: new Date().toLocaleDateString('ja-JP'),
-      meetingDate: '2026/03/18 10:00〜10:30',
-      comment: 'テスト書き込み',
-      bookingId: 'TEST-' + Date.now(),
-      eventId: 'test-event-id',
-      memberName: '野口純',
-      memberEmail: 'j.noguchi@digi-man.com',
-      startISO: new Date().toISOString(),
-      meetUrl: 'https://meet.google.com/test',
-      isReschedule: false,
-    });
-    console.log('✅ スプシ書き込み成功！');
-    alert('✅ スプシ書き込み成功！スプレッドシートを確認してください。');
-  } catch(e) {
-    console.error('❌ スプシ書き込み失敗:', e);
-    alert('❌ 失敗: ' + (e?.result?.error?.message || e?.message || JSON.stringify(e)));
-  }
-};
