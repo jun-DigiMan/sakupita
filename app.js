@@ -153,6 +153,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const _rescheduleId = _urlParams.get('reschedule');
   if (_rescheduleId) {
     const _bookingData = JSON.parse(localStorage.getItem('sakupita_booking_' + _rescheduleId) || 'null');
+    // URLパラメータを即座に除去（リロード時の再トリガー防止）
+    history.replaceState(null, '', window.location.pathname);
     if (_bookingData) {
       // メインアプリ表示後にバナー表示
       setTimeout(() => enterRescheduleMode(_bookingData), 300);
