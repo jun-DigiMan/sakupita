@@ -306,6 +306,7 @@ function gisLoaded() {
       }
       startAutoRefresh();
       loadLogoBase64();
+      initSpreadsheet().catch(e => console.warn('スプシ初期化スキップ:', e));
     },
     error_callback: () => {
       document.getElementById('loading-screen').classList.add('hidden');
@@ -331,6 +332,7 @@ function checkAndAutoSignIn() {
     if (state.authReady) {
       // トークン復元済み → 即座にfreeBusy取得してスロット表示
       loadAndRender();
+      initSpreadsheet().catch(e => console.warn('スプシ初期化スキップ:', e));
     } else {
       // 保存トークンなし → 再接続ボタンを表示（モバイルSafariでポップアップブロックを避けるためユーザー操作を要求）
       showReconnectOverlay();
@@ -1087,23 +1089,47 @@ async function sendConfirmationEmails({ customerName, companyName, customerEmail
   ]);
 }
 
+// ---------- スプレッドシート初期化（サインイン後に自動実行） ----------
+async function initSpreadsheet() {
+  const sheetId = CONFIG.SHEET_ID || localStorage.getItem('sakupita_sheet_id');
+  if (!sheetId) return;
+
+  const HEADERS = ['企業名', '顧客名', '部署', '役職', '電話番号', 'メールアドレス', 'メール送信日', '商談日時', 'コメント', '担当者', '担当者メール', '予約ID', 'カレンダーイベントID', '開始日時', '種別', '会議URL'];
+
+  const meta = await gapi.client.request({
+    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`,
+    params: { fields: 'properties.title,sheets.properties' },
+  });
+
+  // スプシ名変更
+  if (meta.result.properties?.title !== '【サクピタ】顧客管理表') {
+    await gapi.client.request({
+      path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`,
+      method: 'POST',
+      body: { requests: [{ updateSpreadsheetProperties: { properties: { title: '【サクピタ】顧客管理表' }, fields: 'title' } }] },
+    });
+  }
+
+  // 最初のシートタブ名を取得してヘッダーを確認・更新
+  const tabTitle = meta.result.sheets?.[0]?.properties?.title || 'Sheet1';
+  const range = encodeURIComponent(tabTitle);
+  const headerCheck = await gapi.client.request({
+    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}!A1`,
+  });
+  if ((headerCheck.result.values?.[0]?.length || 0) < HEADERS.length) {
+    await gapi.client.request({
+      path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}!A1`,
+      method: 'PUT',
+      params: { valueInputOption: 'USER_ENTERED' },
+      body: { values: [HEADERS] },
+    });
+    console.log('スプシヘッダー更新完了:', tabTitle);
+  }
+}
+
 // ---------- スプレッドシート連携 ----------
 async function appendToSheet({ companyName, customerName, customerDept, customerTitle, customerPhone, customerEmail, sentDate, meetingDate, comment, bookingId, eventId, memberName, memberEmail, startISO, meetUrl, isReschedule }) {
   let sheetId = CONFIG.SHEET_ID || localStorage.getItem('sakupita_sheet_id');
-
-  // 既存シートのタイトルを正しい名前に更新（初回のみ）
-  if (sheetId && !localStorage.getItem('sakupita_sheet_renamed')) {
-    try {
-      await gapi.client.request({
-        path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`,
-        method: 'POST',
-        body: { requests: [{ updateSpreadsheetProperties: { properties: { title: '【サクピタ】顧客管理表' }, fields: 'title' } }] },
-      });
-      localStorage.setItem('sakupita_sheet_renamed', '1');
-    } catch(e) { console.warn('シート名変更スキップ:', e); }
-  }
-
-  const HEADERS = ['企業名', '顧客名', '部署', '役職', '電話番号', 'メールアドレス', 'メール送信日', '商談日時', 'コメント', '担当者', '担当者メール', '予約ID', 'カレンダーイベントID', '開始日時', '種別', '会議URL'];
 
   if (!sheetId) {
     // 初回: スプレッドシートを自動作成
@@ -1120,21 +1146,19 @@ async function appendToSheet({ companyName, customerName, customerDept, customer
     CONFIG.SHEET_ID = sheetId;
   }
 
-  // ヘッダー行が未設定なら書き込む（既存シート含む）
-  const headerCheck = await gapi.client.request({
-    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1%21A1`,
+  // initSpreadsheet で初期化済みのはずだが念のため実行
+  await initSpreadsheet();
+
+  // シートタブ名を取得してデータ追記
+  const meta2 = await gapi.client.request({
+    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`,
+    params: { fields: 'sheets.properties' },
   });
-  if (!headerCheck.result.values?.[0]?.[0]) {
-    await gapi.client.request({
-      path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1%21A1`,
-      method: 'PUT',
-      params: { valueInputOption: 'USER_ENTERED' },
-      body: { values: [HEADERS] },
-    });
-  }
+  const tabTitle = meta2.result.sheets?.[0]?.properties?.title || 'Sheet1';
+  const range = encodeURIComponent(tabTitle);
 
   await gapi.client.request({
-    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1%21A1:append`,
+    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}!A1:append`,
     method: 'POST',
     params: { valueInputOption: 'USER_ENTERED' },
     body: { values: [[companyName, customerName, customerDept, customerTitle, customerPhone, customerEmail, sentDate, meetingDate, comment, memberName || '', memberEmail || '', bookingId || '', eventId || '', startISO || '', isReschedule ? '日程変更' : '新規予約', meetUrl || '']] },
