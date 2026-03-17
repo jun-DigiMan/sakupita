@@ -891,7 +891,8 @@ async function handleBooking() {
         // リスケジュールモード終了
         if (state.rescheduleData) exitRescheduleMode();
       } catch(sheetErr) {
-        console.warn('スプレッドシート記録失敗:', sheetErr);
+        const msg = sheetErr?.result?.error?.message || sheetErr?.message || JSON.stringify(sheetErr);
+        console.error('スプレッドシート記録失敗:', msg, sheetErr);
       }
     }
 
@@ -1130,12 +1131,21 @@ async function appendToSheet({ companyName, customerName, customerDept, customer
   const sheetId = CONFIG.SHEET_ID || localStorage.getItem('sakupita_sheet_id');
   if (!sheetId) throw new Error('SHEET_ID が未設定です');
 
-  await gapi.client.request({
-    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:append`,
+  // シートタブ名をAPIで取得して明示指定
+  const metaRes = await gapi.client.request({
+    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`,
+    params: { fields: 'sheets.properties(title)' },
+  });
+  const tabName = metaRes.result.sheets?.[0]?.properties?.title || 'Sheet1';
+  const encodedRange = encodeURIComponent(tabName + '!A1');
+
+  const appendRes = await gapi.client.request({
+    path: `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodedRange}:append`,
     method: 'POST',
     params: { valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS' },
     body: { values: [[companyName, customerName, customerDept, customerTitle, customerPhone, customerEmail, sentDate, meetingDate, comment, memberName || '', memberEmail || '', bookingId || '', eventId || '', startISO || '', isReschedule ? '日程変更' : '新規予約', meetUrl || '']] },
   });
+  console.log('スプシ書き込み完了:', appendRes?.result?.updates);
 }
 
 // ---------- Google Calendar Free/Busy 取得 ----------
