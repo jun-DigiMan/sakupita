@@ -553,9 +553,13 @@ function renderSlots() {
         const endM      = endMin % 60;
         const fmt = (h, m) => `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 
+        // 現在時刻+3時間より前のスロットは選択不可
+        const minBookable = Date.now() + 3 * 60 * 60 * 1000;
+        const isPast = new Date(slotStart).getTime() < minBookable;
+
         const available = state.members.filter(m => !isBusy(m.calendarId, slotStart, slotEnd));
 
-        if (available.length > 0 && (state.authReady || Object.keys(state.busyData).length > 0)) {
+        if (!isPast && available.length > 0 && (state.authReady || Object.keys(state.busyData).length > 0)) {
           const btn = document.createElement('button');
           const is60 = state.slotMinutes === 60;
           const is2week = state.weekCount === 2;
