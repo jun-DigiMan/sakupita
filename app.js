@@ -4110,9 +4110,127 @@ const KANJI_INITIALS = {
   '一':'i','壱':'i','市':'i','英':'e','栄':'e','永':'e',
 };
 
-// 漢字N文字の苗字/名前に対するローマ字文字数の期待範囲
-// 実測値ベース: 金(3)、金光(9)、光一郎(8)、田中(6) etc.
+// 漢字N文字の苗字/名前に対するローマ字文字数の期待範囲（補助用）
 const ROMAJI_RANGES = { 1:[2,6], 2:[4,11], 3:[6,14], 4:[8,17] };
+
+// 名前漢字 → ローマ字読みテーブル（苗字・名前頻出漢字）
+const KANJI_READINGS = {
+  '田':['ta','da'],'中':['naka','na'],'山':['yama','ya'],'野':['no','ya'],
+  '口':['guchi','kuchi','ko','gu'],'村':['mura'],'川':['kawa','gawa'],
+  '木':['ki','gi'],'本':['moto','hon'],'原':['hara','bara'],
+  '島':['shima','jima'],'嶋':['shima','jima'],'嶌':['shima','jima'],
+  '崎':['saki','zaki'],'藤':['to','fuji'],'林':['hayashi'],'森':['mori'],
+  '松':['matsu'],'竹':['take'],'橋':['hashi','bashi'],
+  '石':['ishi','i'],'岡':['oka'],'沢':['zawa','sawa'],'澤':['zawa','sawa'],
+  '谷':['tani','ya','ga'],'浜':['hama'],'濱':['hama'],'池':['ike'],
+  '上':['kami','ueda','ue','jo'],'下':['shimo','shita','ge'],
+  '西':['nishi'],'東':['higashi','azuma'],'北':['kita'],'南':['minami'],
+  '大':['o','oo','dai'],'小':['ko','o'],'高':['taka'],'新':['shin','ara','ni'],
+  '古':['ko','furu'],'長':['naga','cho'],'清':['sei','kiyo'],
+  '深':['fuka','shin'],'水':['mizu','sui'],'光':['mitsu','ko','hi'],
+  '正':['masa','sho'],'幸':['yuki','ko'],'健':['ken','take'],
+  '和':['kazu','wa','nago'],'信':['nobu','shin'],'英':['ei','hide'],
+  '一':['ichi','kazu','i'],'太':['ta'],'郎':['ro','rou'],
+  '子':['ko'],'美':['mi'],'花':['hana','ka'],'香':['ka','ko'],
+  '愛':['ai'],'真':['ma','shin'],'純':['jun'],'翔':['sho'],
+  '陽':['yo','hi'],'海':['kai','umi'],'空':['ku','sora'],
+  '宇':['u'],'伊':['i'],'佐':['sa'],'加':['ka'],'斉':['sai'],
+  '斎':['sai'],'齋':['sai'],'前':['mae'],'後':['go','ushi'],
+  '坂':['saka'],'辻':['tsuji'],'塚':['tsuka'],'浦':['ura'],'津':['tsu'],
+  '寺':['tera'],'神':['kami','ko','jin'],'宮':['miya'],'金':['kin','kana','kane'],
+  '鈴':['suzu'],'菅':['suga','kan'],'荒':['ara'],'荻':['ogi'],
+  '鹿':['shika','ka'],'熊':['kuma'],'亀':['kame'],'龍':['ryu','tatsu'],
+  '虎':['tora'],'鶴':['tsuru'],'鷹':['taka'],'鷲':['washi'],
+  '岩':['iwa'],'春':['haru'],'夏':['natsu'],'秋':['aki'],'冬':['fuyu'],
+  '渡':['wata'],'辺':['nabe','be'],'江':['e','go'],'浅':['asa'],
+  '近':['chika','kon'],'遠':['to','en'],'内':['uchi'],'岸':['kishi'],
+  '根':['ne'],'端':['hata'],'峰':['mine'],'磯':['iso'],'瀬':['se'],
+  '渕':['fuchi'],'淵':['fuchi'],'蔵':['kura'],'倉':['kura'],
+  '朝':['asa'],'夕':['yu'],'雨':['ame'],'雪':['yuki'],'風':['kaze'],
+  '牧':['maki'],'馬':['uma','ba'],'猪':['i','ino'],
+  '桜':['sakura'],'梅':['ume'],'椿':['tsubaki'],'柿':['kaki'],
+  '菊':['kiku'],'葵':['aoi'],'芹':['seri'],'茅':['kaya'],
+  '吉':['yoshi','yo','kichi'],'安':['yasu','an'],'富':['tomi','fu'],
+  '豊':['tomi','yo'],'勝':['katsu','masa'],'成':['nari','sei'],
+  '武':['take','bu'],'道':['michi','do'],'義':['yoshi','gi'],
+  '徳':['toku'],'智':['tomo','chi'],'仁':['jin','ni'],'博':['hiro'],
+  '浩':['hiro'],'広':['hiro'],'弘':['hiro'],'裕':['yu','hiro'],
+  '康':['yasu','ko'],'明':['aki','a','mei'],'昭':['aki','sho'],
+  '朗':['ro'],'晃':['akira','ko'],'良':['yoshi','ra','ryo'],
+  '男':['o'],'雄':['yu','o'],'次':['tsugi','ji'],'治':['ji','haru'],
+  '志':['shi'],'司':['tsu'],'進':['shin'],'順':['jun'],
+  '俊':['toshi','shun'],'敏':['toshi'],'克':['katsu'],'邦':['kuni'],
+  '国':['kuni'],'久':['hisa','ku'],'文':['bun','fumi'],'哲':['tetsu'],
+  '達':['tatsu'],'登':['to','nori'],'宣':['nobu'],'伸':['nobu','shin'],
+  '悟':['satoru'],'聡':['satoru'],'誠':['makoto','sei'],'隆':['taka'],
+  '貴':['taka'],'賢':['ken'],'輝':['teru','ki'],'樹':['itsuki'],
+  '蓮':['ren'],'颯':['so'],'碧':['ao'],'凛':['rin'],'瑛':['ei'],
+  '琴':['koto'],'奏':['kana'],'柚':['yuzu'],'莉':['ri'],
+  '七':['nana'],'八':['ya'],'三':['mi','san'],'二':['ni','ji'],
+  '五':['go'],'六':['roku'],'九':['ku'],'十':['ju'],
+  '平':['hira','tai'],'井':['i'],'池':['ike'],'岡':['oka'],
+  '牛':['ushi'],'鮎':['ayu'],'鯉':['koi'],'鷺':['sagi'],
+  '波':['nami','ha'],'羽':['hane','ha','u'],'葉':['yo','ha'],
+  '海老':['ebi'],'阿久':['aku'],
+};
+
+// 漢字列 → ローマ字候補を列挙（最大100件）
+function genRomaji(str) {
+  // 2文字以上の複合キーを先に試みる
+  let results = [''];
+  let i = 0;
+  while (i < str.length) {
+    const two = str.slice(i, i + 2);
+    const readings = KANJI_READINGS[two] || KANJI_READINGS[str[i]];
+    const step = (KANJI_READINGS[two] && two.length === 2) ? 2 : 1;
+    if (!readings) {
+      const init = KANJI_INITIALS[str[i]] || '';
+      results = results.map(r => r + init);
+      i++;
+      continue;
+    }
+    const next = [];
+    for (const r of results) {
+      for (const rd of readings) {
+        next.push(r + rd);
+        if (next.length >= 100) break;
+      }
+      if (next.length >= 100) break;
+    }
+    results = next.length ? next : results;
+    i += step;
+  }
+  return [...new Set(results)];
+}
+
+// メールパート ep と漢字列 kanjiStr のローマ字類似度（0〜100）
+function romajiSim(ep, kanjiStr) {
+  if (!ep || !kanjiStr) return 0;
+  const e = ep.toLowerCase();
+  const rList = genRomaji(kanjiStr);
+  let best = 0;
+  for (const r of rList) {
+    if (e === r)                            { return 100; }
+    if (e.startsWith(r) || r.startsWith(e)){ best = Math.max(best, 75); continue; }
+    if (e.includes(r) || r.includes(e))    { best = Math.max(best, 50); continue; }
+    if (r.length > 1 && e[0] === r[0])     { best = Math.max(best, 15); }
+  }
+  return best;
+}
+
+// 長さベース補助スコア
+function lenScore(ep, kanjiStr) {
+  if (!ep) return 0;
+  const init = KANJI_INITIALS[kanjiStr[0]] || '';
+  if (ep.length === 1) return init === ep ? 10 : 0;
+  const n = Math.min(kanjiStr.length, 4);
+  const [rMin, rMax] = ROMAJI_RANGES[n] || [n * 2, n * 5];
+  const mid = (rMin + rMax) / 2;
+  let s = ep.length >= rMin && ep.length <= rMax
+    ? Math.max(3, 10 - Math.abs(ep.length - mid) * 1.5)
+    : Math.max(0, 3 - (ep.length < rMin ? rMin - ep.length : ep.length - rMax) * 1.5);
+  return s + (init && ep[0] === init ? 4 : 0);
+}
 
 // メールアドレスのローカル部からヒントを抽出して苗字/名前を判別
 function splitJapaneseName(name, email) {
@@ -4132,50 +4250,65 @@ function splitJapaneseName(name, email) {
   if (candidates.length === 0) {
     return clean.length > 2 ? clean.slice(0, 2) + ' ' + clean.slice(2) : clean;
   }
-  if (candidates.length === 1 || !email) {
+  if (candidates.length === 1) {
+    return candidates[0].surname + ' ' + candidates[0].given;
+  }
+  // メールなし → 最長苗字優先
+  if (!email) {
+    candidates.sort((a, b) => b.surname.length - a.surname.length);
     return candidates[0].surname + ' ' + candidates[0].given;
   }
 
-  // メールヒントでスコアリング
   const localPart = email.split('@')[0].toLowerCase();
-  const emailParts = localPart.split(/[._\-]/).filter(p => p.length > 0);
+  const emailParts = localPart.split(/[._\-+]/).filter(p => p.length > 0);
 
-  // ローマ字パート p が漢字列 kanjiStr に対応しているか採点
-  function partScore(p, kanjiStr) {
-    if (!p || !kanjiStr) return 0;
-    const init = KANJI_INITIALS[kanjiStr[0]] || '';
-    if (p.length === 1) return init === p ? 10 : 0;
-    const n = Math.min(kanjiStr.length, 4);
-    const [rMin, rMax] = ROMAJI_RANGES[n] || [n * 2, n * 5];
-    const mid = (rMin + rMax) / 2;
-    let lenScore;
-    if (p.length >= rMin && p.length <= rMax) {
-      // 範囲内: 中心に近いほど高得点
-      lenScore = Math.max(3, 10 - Math.abs(p.length - mid) * 1.5);
-    } else {
-      // 範囲外: 距離に応じて急落
-      const dist = p.length < rMin ? rMin - p.length : p.length - rMax;
-      lenScore = Math.max(0, 3 - dist * 1.5);
+  function scoreOne(c) {
+    if (emailParts.length >= 2) {
+      // 2パート: 「p1=苗字, p2=名前」「p1=名前, p2=苗字」両方向
+      const [p1, p2] = emailParts;
+      const fwd = romajiSim(p1, c.surname) + romajiSim(p2, c.given)
+                + lenScore(p1, c.surname) * 0.15 + lenScore(p2, c.given) * 0.15;
+      const rev = romajiSim(p1, c.given)   + romajiSim(p2, c.surname)
+                + lenScore(p1, c.given) * 0.15   + lenScore(p2, c.surname) * 0.15;
+      return Math.max(fwd, rev);
     }
-    const initBonus = (init && p[0] === init) ? 4 : 0;
-    return lenScore + initBonus;
+
+    // 1パート: 複数パターンで判定
+    const ep = emailParts[0] || '';
+    const sRomaji = genRomaji(c.surname);
+    const gRomaji = genRomaji(c.given);
+    const gInit   = KANJI_INITIALS[c.given?.[0]] || '';
+    let s = 0;
+
+    // A: ep が苗字そのもの
+    for (const r of sRomaji) {
+      if (ep === r)                             { s = Math.max(s, 95); break; }
+      if (ep.endsWith(r) || ep.startsWith(r))  { s = Math.max(s, 65); break; }
+      if (ep.includes(r))                       { s = Math.max(s, 45); }
+    }
+    // B: ep = 名前イニシャル + 苗字 (例: jnoguchi = j + noguchi)
+    if (gInit && ep.startsWith(gInit)) {
+      const rest = ep.slice(gInit.length);
+      for (const r of sRomaji) {
+        if (rest === r)                         { s = Math.max(s, 90); break; }
+        if (rest.startsWith(r))                 { s = Math.max(s, 60); break; }
+      }
+    }
+    // C: ep が名前そのもの（名前メールの場合）
+    for (const r of gRomaji) {
+      if (ep === r)                             { s = Math.max(s, 60); break; }
+    }
+    // D: ep = 苗字 + 名前イニシャル
+    const sInit = KANJI_INITIALS[c.surname?.[0]] || '';
+    for (const r of sRomaji) {
+      if (ep.startsWith(r) && ep.length > r.length) { s = Math.max(s, 55); break; }
+    }
+
+    return s + lenScore(ep, c.surname) * 0.2;
   }
 
-  const scored = candidates.map(c => {
-    let score;
-    if (emailParts.length >= 2) {
-      // 2パート以上: 「p1=苗字,p2=名前」「p1=名前,p2=苗字」両方向のベストを採用
-      const [p1, p2] = emailParts;
-      const fwd = partScore(p1, c.surname) + partScore(p2, c.given);
-      const rev = partScore(p1, c.given)   + partScore(p2, c.surname);
-      score = Math.max(fwd, rev);
-    } else {
-      // 1パート: 日本の業務メールは苗字ベースが多いので苗字として照合
-      score = partScore(emailParts[0], c.surname);
-    }
-    return { ...c, score };
-  });
-
+  const scored = candidates.map(c => ({ ...c, score: scoreOne(c) }));
+  // スコア同点は苗字が長い方（より具体的）を優先
   scored.sort((a, b) => b.score - a.score || b.surname.length - a.surname.length);
   return scored[0].surname + ' ' + scored[0].given;
 }
